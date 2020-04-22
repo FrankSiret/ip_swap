@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qtquickcontrols2.conf</file>
+        <file>img/resizeDiagonal.png</file>
+        <file>img/resize.svg</file>
+        <file>img/settings1.svg</file>
+        <file>img/settings2.svg</file>
+        <file>img/settings3.svg</file>
+        <file>app.qml</file>
+        <file>AdapterTab.qml</file>
+        <file>ProfileTab.qml</file>
+        <file>validateIp.js</file>
+        <file>img/refresh_1.svg</file>
+        <file>img/refresh_2.svg</file>
+        <file>img/refresh_3.svg</file>
+        <file>img/delete1.svg</file>
+        <file>img/delete2.svg</file>
+        <file>img/delete3.svg</file>
+        <file>img/copy1.svg</file>
+        <file>img/copy2.svg</file>
+        <file>img/copy3.svg</file>
+        <file>img/save1.svg</file>
+        <file>img/save2.svg</file>
+        <file>img/save3.svg</file>
+    </qresource>
+</RCC>

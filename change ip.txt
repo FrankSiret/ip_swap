@@ -1,0 +1,9 @@
+netsh interface ip set address "Description" static $address$ $netmask$ $gateway$ $metric$
+netsh interface ip set address "Description" dhcp
+netsh interface ip set dns "Description" static $DNS$
+netsh interface ip add dns "Description" $DNS$ index=$index$
+
+netsh interface ip set address "Wi-Fi" dhcp
+netsh interface ip set address "Wi-Fi" static 192.168.1.10 255.255.255.0 192.168.1.1 1
+netsh interface ip set dns "Wi-Fi" static 192.168.1.1
+netsh interface ip add dns "Wi-Fi" static 192.168.1.1 index=2
