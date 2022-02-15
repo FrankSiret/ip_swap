@@ -1,7 +1,7 @@
-import QtQml 2.2
-import QtQuick 2.9
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.2
+import QtQml 2.12
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import ip_swap 1.0
 import "./validateIp.js" as JS
 
@@ -16,12 +16,18 @@ ColumnLayout {
     property alias gateway: l_gateway.text
     property alias dns1:    l_dns1.text
     property alias dns2:    l_dns2.text
+    property alias proxy:    l_proxy.text
+    property alias port:    l_port.text
+    property alias proxy_except:    l_proxy_except.text
 
     property alias t_ip:      t_ip
     property alias t_mask:    t_mask
     property alias t_gateway: t_gateway
     property alias t_dns1:    t_dns1
     property alias t_dns2:    t_dns2
+    property alias t_proxy:    t_proxy
+    property alias t_port:    t_port
+    property alias t_proxy_except:    t_proxy_except
 
     signal _saveProfile()
     signal _changeProfile(var _profile)
@@ -197,64 +203,123 @@ ColumnLayout {
             Layout.fillHeight: true
             radius: 4
             color: "#2b2b2b"
-            GridLayout {
-                id: rectData
+            ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 18
                 anchors.topMargin: 5
                 anchors.bottomMargin: 12
-                rowSpacing: 0
-                columnSpacing: 20
-                columns: 2
-                Label { id: t_ip; text: "IP Address" }
-                TextField {
-                    id: l_ip
-                    Layout.fillWidth: true
-                    selectByMouse: true
-                    onTextEdited: text = JS.validateIp(l_ip)
-                    validator: RegExpValidator { regExp: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
-                    color: t_ip.color
+//                spacing: 20
+                GridLayout {
+                    id: rectData
+                    rowSpacing: 0
+                    columnSpacing: 20
+                    columns: 2
+                    Label { id: t_ip; text: "IP Address" }
+                    TextField {
+                        id: l_ip
+                        Layout.fillWidth: true
+                        selectByMouse: true
+                        onTextEdited: text = JS.validateIp(l_ip)
+    //                    validator: RegularExpressionValidator { regularExpression: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
+                        color: t_ip.color
+                    }
+                    Label { id: t_mask; text: "Subnet Mask" }
+                    TextField {
+                        id: l_mask
+                        Layout.fillWidth: true
+                        selectByMouse: true
+                        onTextEdited: text = JS.validateIp(l_mask)
+    //                    validator: RegularExpressionValidator { regularExpression: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
+                        color: t_mask.color
+                    }
+                    Label { id: t_gateway; text: "Default Gateway" }
+                    TextField {
+                        id: l_gateway
+                        Layout.fillWidth: true
+                        selectByMouse: true
+                        onTextEdited: text = JS.validateIp(l_gateway)
+    //                    validator: RegularExpressionValidator { regularExpression: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
+                        color: t_gateway.color
+                    }
+                    Label { id: t_dns1; text: "Primary DNS" }
+                    TextField {
+                        id: l_dns1
+                        Layout.fillWidth: true
+                        selectByMouse: true
+                        onTextEdited: text = JS.validateIp(l_dns1)
+    //                    validator: RegularExpressionValidator { regularExpression: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
+                        color: t_dns1.color
+                    }
+                    Label { id: t_dns2; text: "Alternative DNS" }
+                    TextField {
+                        id: l_dns2
+                        Layout.fillWidth: true
+                        selectByMouse: true
+                        onTextEdited: text = JS.validateIp(l_dns2)
+                        color: t_dns2.color
+                    }
                 }
-                Label { id: t_mask; text: "Subnet Mask" }
-                TextField {
-                    id: l_mask
-                    Layout.fillWidth: true
-                    selectByMouse: true
-                    onTextEdited: text = JS.validateIp(l_mask)
-                    validator: RegExpValidator { regExp: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
-                    color: t_mask.color
-                }
-                Label { id: t_gateway; text: "Default Gateway" }
-                TextField {
-                    id: l_gateway
-                    Layout.fillWidth: true
-                    selectByMouse: true
-                    onTextEdited: text = JS.validateIp(l_gateway)
-                    validator: RegExpValidator { regExp: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
-                    color: t_gateway.color
-                }
-                Label { id: t_dns1; text: "Primary DNS" }
-                TextField {
-                    id: l_dns1
-                    Layout.fillWidth: true
-                    selectByMouse: true
-                    onTextEdited: text = JS.validateIp(l_dns1)
-                    validator: RegExpValidator { regExp: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
-                    color: t_dns1.color
-                }
-                Label { id: t_dns2; text: "Alternative DNS" }
-                TextField {
-                    id: l_dns2
-                    Layout.fillWidth: true
-                    selectByMouse: true
-                    onTextEdited: text = JS.validateIp(l_dns2)
-                    validator: RegExpValidator { regExp: /([0-9]{1,3}[\.]){3,3}[0-9]{1,3}/ }
-                    color: t_dns2.color
+                GridLayout {
+                    rowSpacing: 0
+                    columnSpacing: 20
+                    columns: 2
+                    Label { id: t_proxy; text: "Proxy" }
+                    TextField {
+                        id: l_proxy
+                        Layout.fillWidth: true
+                        selectByMouse: true
+                        color: t_proxy.color
+                    }
+                    Label { id: t_port; text: "Port" }
+                    TextField {
+                        id: l_port
+                        Layout.fillWidth: true
+                        selectByMouse: true
+                        onTextEdited: text = JS.validatePort(l_port)
+                        color: t_port.color
+                    }
+                    Label { id: t_proxy_except; text: "Do not use proxy for:"; Layout.columnSpan: 2; Layout.bottomMargin: 10; Layout.topMargin: 10 }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.columnSpan: 2
+                        clip: true
+                        height: 80
+                        color: "transparent"
+                        ScrollView {
+                            anchors.fill: parent
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            TextArea {
+                                property bool isFocus: false
+                                id: l_proxy_except
+                                selectByMouse: true
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                hoverEnabled: true
+                                onFocusChanged: isFocus = focus
+                                color: t_proxy_except.color
+                                clip: true
+                                background: Item {
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        color: "#303030"
+                                        Rectangle {
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.bottom: parent.bottom
+                                            height: 2
+                                            color: l_proxy_except.isFocus ? "#ce93d8" :
+                                                                          l_proxy_except.hovered ? "#fff" : "#3b3b3b"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             Rectangle {
                 id: rectDataOverEnabled
                 anchors.fill: rectDataOver
+                anchors.bottomMargin: 230
                 radius: 4
                 color: rectDataOver.color
                 opacity: 0

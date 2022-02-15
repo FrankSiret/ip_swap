@@ -7,6 +7,16 @@ function validateIp(object) {
     return text
 }
 
+const validatePort = (object) => {
+    var port = +object.text
+    if(port >= 0 && port <= 65536) {
+        return port
+    }
+    if(isNaN(port)) return "0"
+    if(port > 65536) return "65536"
+    if(port < 0) return "0"
+}
+
 var c0 = "white"
 var c1 = "red"
 

@@ -9,14 +9,16 @@ import "./validateIp.js" as JS
 ApplicationWindow {
     id: window
     visible: true
-    width: 680
-    height: 520
+    width: 800
+    height: 700
 
-    minimumWidth: 680
+    minimumWidth: 800
     maximumWidth: 800
 
-    minimumHeight: 520
-    maximumHeight: 520
+    minimumHeight: 700
+    maximumHeight: 700
+
+    font.pointSize: 10
 
     color: "transparent"
     background: Rectangle {
@@ -67,6 +69,9 @@ ApplicationWindow {
             adapterTab.agateway = "";
             adapterTab.adns1 = "";
             adapterTab.adns2 = "";
+            adapterTab.aproxy = "";
+            adapterTab.aport = "";
+            adapterTab.aproxy_except = "";
         }
         onSetConnected: {
             if( _isConnected ) {
@@ -92,6 +97,11 @@ ApplicationWindow {
             adapterTab.adns1 = _dns1
             adapterTab.adns2 = _dns2
         }
+        onGetProxy: {
+            adapterTab.aproxy = _proxy
+            adapterTab.aport = _port
+            adapterTab.aproxy_except = _proxy_except
+        }
         onSetIp: {
             if(_dhcp)
                 profileTab.dhcpProtocol.checked = true
@@ -104,6 +114,11 @@ ApplicationWindow {
         onSetDns: {
             profileTab.dns1 = _dns1
             profileTab.dns2 = _dns2
+        }
+        onSetProxy: {
+            profileTab.proxy = _proxy
+            profileTab.port = _port
+            profileTab.proxy_except = _proxy_except
         }
     }
 
@@ -269,9 +284,10 @@ ApplicationWindow {
             Layout.fillWidth: true
         }
 
-        /*Label {
+        Label {
             text: "frank.siret@gmail.com"
             font.pointSize: 9
+            anchors.rightMargin: 20
             color: "#ce93d8"
             property bool hover: false
             MouseArea{
@@ -291,7 +307,7 @@ ApplicationWindow {
                 timeout: 2000
                 visible: parent.hover
             }
-        }*/
+        }
 
         Rectangle {
             id: buttonClose
@@ -378,7 +394,9 @@ ApplicationWindow {
         AdapterTab {
             id: adapterTab
             Layout.fillWidth: true
-            on_ChangeAdapter: ipSwap.changeAdapter(_adapter)
+            on_ChangeAdapter: _adapter => {
+                ipSwap.changeAdapter(_adapter)
+            }
             on_GetInterface: ipSwap.get_interfaces()
             on_CopyToProfile: {
                 if(adapterTab.adhcp === "Yes")
@@ -390,12 +408,15 @@ ApplicationWindow {
                 profileTab.gateway = adapterTab.agateway
                 profileTab.dns1 = adapterTab.adns1
                 profileTab.dns2 = adapterTab.adns2
+                profileTab.proxy = adapterTab.aproxy
+                profileTab.port = adapterTab.aport
+                profileTab.proxy_except = adapterTab.aproxy_except
             }
         }
         ProfileTab {
             id: profileTab
-            Layout.maximumWidth: 300
-            on_ChangeProfile: ipSwap.update_profile(_profile)
+            Layout.maximumWidth: 340
+            on_ChangeProfile: (_profile) => ipSwap.update_profile(_profile)
             on_SaveProfile: {
                 if ( profileTab.dhcpProtocol.checked || JS.isValidIp(profileTab) )
                     saveProfileDialog.open()
@@ -420,7 +441,8 @@ ApplicationWindow {
                     ipSwap.set_addresses(profileTab.dhcpProtocol.checked,
                                          profileTab.ip, profileTab.mask,
                                          profileTab.gateway, profileTab.dns1,
-                                         profileTab.dns2, adapterTab.cb_adapters.currentText)
+                                         profileTab.dns2, profileTab.proxy, profileTab.port,
+                                         profileTab.proxy_except, adapterTab.cb_adapters.currentText)
             }
         }
         /*Button {
@@ -513,7 +535,8 @@ ApplicationWindow {
             ipSwap.save_profile(profileTab.dhcpProtocol.checked,
                                 profileTab.ip, profileTab.mask,
                                 profileTab.gateway, profileTab.dns1,
-                                profileTab.dns2, profile.text)
+                                profileTab.dns2, profileTab.proxy, profileTab.port,
+                                profileTab.proxy_except, profile.text)
             profile.text = ""
         }
         onClosed: textProfileError.color = "transparent"

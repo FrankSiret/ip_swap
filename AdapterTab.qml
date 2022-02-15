@@ -15,6 +15,9 @@ ColumnLayout {
     property alias agateway: l_agateway.text
     property alias adns1: l_adns1.text
     property alias adns2: l_adns2.text
+    property alias aproxy: l_aproxy.text
+    property alias aport: l_aport.text
+    property alias aproxy_except: l_aproxy_except.text
     property alias connected: l_connected
     property alias description: l_description.text
     property alias mac: l_mac.text
@@ -54,13 +57,35 @@ ColumnLayout {
             columns: 2
             Label { id: l_connected; Layout.fillWidth: false; bottomPadding: 5; font.bold: true; Layout.columnSpan: 2 }
             Label { id: l_description; Layout.fillWidth: false; Layout.columnSpan: 2 }
-            Label { text: "MAC"; }                          Label { id: l_mac; bottomPadding: 5; }
-            Label { text: "DHCP" ;Layout.fillWidth: false } Label { id: l_adhcp ;Layout.fillWidth: true }
+            Label { text: "MAC" }                           Label { id: l_mac; bottomPadding: 5; }
+            Label { text: "DHCP"; Layout.fillWidth: false } Label { id: l_adhcp ;Layout.fillWidth: true }
             Label { text: "IP Address" }                    Label { id: l_aip ;Layout.fillWidth: false }
             Label { text: "Subnet Mask" }                   Label { id: l_amask }
             Label { text: "Default Gateway" }               Label { id: l_agateway }
             Label { text: "Primary DNS" }                   Label { id: l_adns1 }
             Label { text: "Alternative DNS" }               Label { id: l_adns2 }
+            Rectangle {
+                border.color: "#303030"
+                color: "#444"
+                radius: 50
+                height: 3
+                Layout.columnSpan: 2
+                Layout.fillWidth: true
+            }
+            Label { text: "Proxy" }                         Label { id: l_aproxy}
+            Label { text: "Port" }                          Label { id: l_aport}
+            Label { text: "Do not use proxy for:"; Layout.columnSpan: 2 }
+            Rectangle {
+                Layout.columnSpan: 2;
+                Layout.fillWidth: true
+                height: 40
+                color: "transparent"
+                clip: true
+                Label {
+                    id: l_aproxy_except;
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere";
+                }
+            }
         }
         RowLayout {
             anchors.top: parent.top

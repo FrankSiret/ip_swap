@@ -6,6 +6,7 @@
 #include <QStringList>
 #include <QNetworkInterface>
 #include <QGuiApplication>
+#include <QRegularExpression>
 
 #include <QDebug>
 #define db qDebug()
@@ -26,11 +27,12 @@ public:
 
     Q_INVOKABLE void update_profile(const QString &profile);
 
-    Q_INVOKABLE void set_addresses(bool ipDHCP, QString IP, QString MASK, QString GATEWAY, QString DNS1, QString DNS2, QString interface);
-    Q_INVOKABLE void save_profile(bool ipDHCP, QString IP, QString MASK, QString GATEWAY, QString DNS1, QString DNS2, QString profile);
+    Q_INVOKABLE void set_addresses(bool ipDHCP, QString IP, QString MASK, QString GATEWAY, QString DNS1, QString DNS2, QString PROXY, QString PORT, QString PROXY_EXCEPT, QString interface);
+    Q_INVOKABLE void save_profile(bool ipDHCP, QString IP, QString MASK, QString GATEWAY, QString DNS1, QString DNS2, QString PROXY, QString PORT, QString PROXY_EXCEPT, QString profile);
 
     Q_INVOKABLE void validIp(QString &ip);
-//    Q_INVOKABLE void set_proxy();
+    void get_proxy();
+    void set_proxy(QString PROXY, QString PORT, QString PROXY_EXCEPT);
     ~ip_change() { }
 
 //public slots:
@@ -50,6 +52,9 @@ signals:
     void getDns(QString _dns1, QString _dns2);
     void setDns(QString _dns1, QString _dns2);
 
+    void getProxy(QString _proxy, QString _port, QString _proxy_except);
+    void setProxy(QString _proxy, QString _port, QString _proxy_except);
+
 private:
     QList<QString> profiles;
     QList<QString> adapters;
@@ -59,6 +64,9 @@ private:
     bool checkGateway;
     bool checkDns1;
     bool checkDns2;
+    bool checkProxy;
+    bool checkPort;
+    bool checkProxyExcept;
 };
 
 #endif // IP_CHANGE_H

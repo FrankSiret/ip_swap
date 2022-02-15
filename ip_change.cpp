@@ -23,6 +23,24 @@ void ip_change::validIp(QString &ip)
     if(!b) ip = "";
 }
 
+void ip_change::get_proxy()
+{
+    QString _proxy, _port, _proxy_except;
+    QSettings set("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", QSettings::NativeFormat);
+    if(set.value("ProxyEnable", 0).toInt() == 1) {
+        auto p = set.value("ProxyServer").toString();
+        if(p.indexOf(":") != -1) {
+            _proxy = p.section(":",0,-2);
+            _port = p.section(":",-1);
+        }
+        _proxy_except = set.value("ProxyOverride").toString();
+    }
+
+    db << _proxy << _port << _proxy_except;
+
+    emit getProxy(_proxy, _port, _proxy_except);
+}
+
 void ip_change::get_profiles()
 {
     profiles.clear();
@@ -68,7 +86,7 @@ void ip_change::get_dnsservers(const QString &interface)
 
         if(line.contains("dns",Qt::CaseInsensitive)) {
             dns1 = line.section(":",1).trimmed();
-            if(dns1.contains(QRegExp("[a-z]+")))
+            if(dns1.contains(QRegularExpression("[a-z]+")))
                 dns1.clear();
         }
         else if(!line.contains(':') && dns2.isEmpty()) {
@@ -148,6 +166,9 @@ void ip_change::update_profile(const QString &profile)
     QString gateway = set.value("gateway", "").toString();
     QString dns1 = set.value("dns1", "").toString();
     QString dns2 = set.value("dns2", "").toString();
+    QString proxy = set.value("proxy", "").toString();
+    QString port = set.value("port", "").toString();
+    QString proxy_except = set.value("proxy_except", "").toString();
     set.endGroup();
 
     validIp(ip);
@@ -158,9 +179,10 @@ void ip_change::update_profile(const QString &profile)
 
     emit setIp(dhcp, ip, mask, gateway);
     emit setDns(dns1, dns2);
+    emit setProxy(proxy, port, proxy_except);
 }
 
-void ip_change::save_profile(bool ipDHCP, QString IP, QString MASK, QString GATEWAY, QString DNS1, QString DNS2, QString profile)
+void ip_change::save_profile(bool ipDHCP, QString IP, QString MASK, QString GATEWAY, QString DNS1, QString DNS2, QString PROXY, QString PORT, QString PROXY_EXCEPT, QString profile)
 {
     if(ipDHCP) IP = MASK = GATEWAY = DNS1 = DNS2 = "";
     QSettings set(qApp->applicationDirPath()+"/config_ipswap.ini", QSettings::IniFormat);
@@ -171,6 +193,9 @@ void ip_change::save_profile(bool ipDHCP, QString IP, QString MASK, QString GATE
     set.setValue("gateway", GATEWAY);
     set.setValue("dns1", DNS1);
     set.setValue("dns2", DNS2);
+    set.setValue("proxy", PROXY);
+    set.setValue("port", PORT);
+    set.setValue("proxy_except", PROXY_EXCEPT);
     set.endGroup();
     set.setValue("current_profile", profile);
     if (!profiles.contains(profile)) {
@@ -216,9 +241,9 @@ void ip_change::get_ipaddresses(const QString &interface)
             QString maskline = line.section(":",1).trimmed();
             mask = maskline.section(" ",-1).section(")",0,0);
         }
-        else if(gateway.isEmpty() && line.contains("enlace",Qt::CaseInsensitive) || line.contains("gateway",Qt::CaseInsensitive)) {
+        else if(gateway.isEmpty() && (line.contains("enlace",Qt::CaseInsensitive) || line.contains("gateway",Qt::CaseInsensitive))) {
             gateway = line.section(":",1).trimmed();
-            if(gateway.contains(QRegExp("[a-z]+")))
+            if(gateway.contains(QRegularExpression("[a-z]+")))
                 gateway.clear();
         }
     }
@@ -226,7 +251,7 @@ void ip_change::get_ipaddresses(const QString &interface)
     emit getIp(dhcp, ip, mask, gateway);
 }
 
-void ip_change::set_addresses(bool ipDHCP, QString IP, QString MASK, QString GATEWAY, QString DNS1, QString DNS2, QString interface)
+void ip_change::set_addresses(bool ipDHCP, QString IP, QString MASK, QString GATEWAY, QString DNS1, QString DNS2, QString PROXY, QString PORT, QString PROXY_EXCEPT, QString interface)
 {
     QProcess *p = new QProcess(this);
     QString program;
@@ -254,7 +279,7 @@ void ip_change::set_addresses(bool ipDHCP, QString IP, QString MASK, QString GAT
     QString error;
 
     error = p->readAll();
-    b = !error.contains(QRegExp("[a-z]+"));
+    b = !error.contains(QRegularExpression("[a-z]+"));
     qDebug() << error;
 
     if(ipDHCP) {
@@ -264,7 +289,7 @@ void ip_change::set_addresses(bool ipDHCP, QString IP, QString MASK, QString GAT
         p->waitForFinished();
         p->waitForReadyRead();
         error = p->readAll();
-        b &= !error.contains(QRegExp("[a-z]+"));
+        b &= !error.contains(QRegularExpression("[a-z]+"));
         qDebug() << error;
     }
     else {
@@ -279,7 +304,7 @@ void ip_change::set_addresses(bool ipDHCP, QString IP, QString MASK, QString GAT
             p->waitForFinished();
             p->waitForReadyRead();
             error = p->readAll();
-            b &= !error.contains(QRegExp("[a-z]+"));
+            b &= !error.contains(QRegularExpression("[a-z]+"));
             qDebug() << error;
         }
         if(!DNS2.isEmpty()) {
@@ -289,10 +314,12 @@ void ip_change::set_addresses(bool ipDHCP, QString IP, QString MASK, QString GAT
             p->waitForFinished();
             p->waitForReadyRead();
             error = p->readAll();
-            b &= !error.contains(QRegExp("[a-z]+"));
+            b &= !error.contains(QRegularExpression("[a-z]+"));
             qDebug() << error;
         }
     }
+
+    set_proxy(PROXY, PORT, PROXY_EXCEPT);
 
     if(b) {
         QSettings set(qApp->applicationDirPath()+"/config_ipswap.ini", QSettings::IniFormat);
@@ -302,13 +329,20 @@ void ip_change::set_addresses(bool ipDHCP, QString IP, QString MASK, QString GAT
     changeAdapter(interface);
 }
 
-//void ip_change::set_proxy()
-//{
-//    QSettings set("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings", QSettings::NativeFormat);
-//    set.value("ProxyEnable", 1);
-//    set.value("ProxyServer", "internet.uo.edu.cu:3128");
-//    set.value("ProxyOverride", "127.0.0.1;localhost;*.uo.edu.cu;10.30.*;10.31.*;<local>");
-//}
+void ip_change::set_proxy(QString PROXY, QString PORT, QString PROXY_EXCEPT)
+{
+    QSettings set("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", QSettings::NativeFormat);
+    if(PROXY.isEmpty()) {
+        set.setValue("ProxyEnable", 0);
+    }
+    else {
+        set.setValue("ProxyEnable", 1);
+        set.setValue("ProxyServer", QString("%1:%2").arg(PROXY, PORT));
+        //"internet.uo.edu.cu:3128"
+        set.setValue("ProxyOverride", PROXY_EXCEPT);
+        // "127.0.0.1;localhost;*.uo.edu.cu;10.30.*;10.31.*;<local>"
+    }
+}
 
 void ip_change::changeAdapter(const QString &interface)
 {
@@ -324,6 +358,7 @@ void ip_change::changeAdapter(const QString &interface)
     emit setDescription(allAdapter[interface]["description"], allAdapter[interface]["mac"]);
     emit cleanAdapterTab();
     get_ipaddresses(interface);
+    get_proxy();
     get_dnsservers(interface);
 }
 
